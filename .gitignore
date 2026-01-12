@@ -1,0 +1,193 @@
+# ===== AMBIENTE VIRTUAL =====
+venv/
+env/
+ENV/
+.venv
+.env
+.env.local
+.env.*.local
+
+# ===== PYTHON =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ===== PYTEST =====
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+.tox/
+
+# ===== LOGS =====
+logs/
+*.log
+*.log.*
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+*.iml
+.classpath
+.c9/
+*.launch
+.project
+.pydevproject
+.settings
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# ===== DOCKER =====
+.dockerignore
+docker-compose.override.yml
+
+# ===== BANCO DE DADOS =====
+*.sqlite
+*.sqlite3
+*.db
+.mysql_history
+
+# ===== ARMAZENAMENTO LOCAL =====
+*.csv
+*.xlsx
+*.xls
+uploads/
+downloads/
+
+# ===== NODE (se usar frontend integrado) =====
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# ===== ARQUIVOS TEMPORÁRIOS =====
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.~*
+
+# ===== CREDENCIAIS E SECRETS =====
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.crt
+*.csr
+*.der
+*.pfx
+*.p12
+.aws/
+.gcp/
+.azure/
+
+# ===== CACHE =====
+.cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ===== POETRY =====
+poetry.lock
+pyproject.toml.lock
+
+# ===== PIPENV =====
+Pipfile.lock
+
+# ===== ARQUIVOS GERADOS =====
+.coverage.*
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+
+# ===== SISTEMA OPERACIONAL =====
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# ===== PROJETO ESPECÍFICO =====
+# Arquivos de desenvolvimento local
+local_config.py
+settings_local.py
+
+# Documentação gerada
+docs/_build/
+
+# Banco de dados de desenvolvimento
+dev.db
+*.sqlite
+
+# Uploads de usuários
+media/
+uploads/
+
+# Cache de Pinecone
+.pinecone/
+
+# Arquivos de teste
+test_output/
+test_artifacts/
+
+# Relatorios de performance
+performance_reports/
+*.prof
+
+# Backup de dados
+backups/
+*.backup
+*.bak
+
+# ===== VSCODE EXTENSIONS =====
+.vscode/extensions
+.vscode/settings.json
