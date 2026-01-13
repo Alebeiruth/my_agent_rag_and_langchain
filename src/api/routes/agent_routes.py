@@ -69,3 +69,88 @@ async def create_conversation(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao criar conversação: {str(e)}"
         )
+
+@router.get("/conversations", response_model=List[ConversationResponse], tags=["Conversations"])
+async def list_conversations(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_token),
+    limit: int = 20
+):
+    """Lista conversações do usuário"""
+    try:
+        conversations = db_manager.get_user_conversations(
+            db,
+            current_user["user_id"],
+            limit=limit
+        )
+
+        return [
+            ConversationResponse(
+                id=c.id,
+                user_id=c.user_id,
+                title=c.title,
+                status=c.status,
+                system_prompt=c.system_prompt,
+                messages_count=len(c.messages),
+                created_at=c.created_at,
+                updated_at=c.updated_at
+            )
+            for c in conversations
+        ]
+    
+    except Exception as e:
+        logger.error(f"Erro ao listar conversações: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@router.get("/conversations/{conversation_id}", response_model=ConversationDetailResponse, tags=["Conversations"])
+async def get_conversation(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_token)
+):
+    """Obtém detalhes de conversação com histórico"""
+    try:
+        conversation = db_manager.get_conversation(db, conversation_id)
+
+        if not conversation or conversation.user_id != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conversação não encontrada"
+            )
+        
+        messages = db_manager.get_conversation_messages(db, conversation_id)
+
+        return ConversationDetailResponse(
+            id=conversation.id,
+            user_id=conversation.user_id,
+            title=conversation.title,
+            status=conversation.status,
+            system_prompt=conversation.system_prompt,
+            messages_count=len(messages),
+            messages=[
+                MessageResponse(
+                    id=m.id,
+                    conversation_id=m.conversation_id,
+                    role=m.role,
+                    content=m.content,
+                    created_at=m.created_at
+                )
+                for m in messages
+            ],
+            created_at=conversation.created_at,
+            updated_at=conversation.updated_at
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao obter conversação: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+# === Agente ===
