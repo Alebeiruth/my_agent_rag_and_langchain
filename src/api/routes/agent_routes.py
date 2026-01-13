@@ -69,4 +69,3 @@ async def create_conversation(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao criar conversação: {str(e)}"
         )
-
