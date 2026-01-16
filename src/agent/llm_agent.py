@@ -8,7 +8,7 @@ import asyncio
 import sys
 
 from langchain_openai import ChatOpenAI
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
 
@@ -78,7 +78,7 @@ class AgentMetrics:
 class MetricsCollector:
     """Collecto customizado para capturar métricas do LANGCHAIN."""
 
-    def __init_(self):
+    def __init__(self):
         self.start_time = None
         self.llm_start_time = None
         self.token_count = {"input": 0, "output": 0}
@@ -136,7 +136,7 @@ class LLMAgent(BaseAgent):
         )
 
         # self.agent_executor = None
-        # self._build_agent()
+        self._build_agent()
         
         tool_registry.initialize_default_tools()
 
@@ -224,7 +224,7 @@ Responda sempre de forma profissional e informativa."""
         rag_start_time = time.time()
 
         try:
-            sucess, output = await tool_registry.execute_tool(
+            success, output = await tool_registry.execute_tool(
                 "vector_search",
                 {
                     "query": query,
@@ -235,7 +235,7 @@ Responda sempre de forma profissional e informativa."""
 
             rag_time = (time.time() - rag_start_time) * 1000  # ms
 
-            if sucess:
+            if success:
                 results = json.loads(output)
 
                 # Calcular métricas RAG
@@ -258,7 +258,7 @@ Responda sempre de forma profissional e informativa."""
     async def execute(
             self,
             user_input: str,
-            user_tools: bool = True,
+            use_tools: bool = True,
             conversation_id: Optional[int] = None,
             sector: Optional[str] = None,
             user_id: Optional[int] = None
@@ -357,7 +357,7 @@ Responda sempre de forma profissional e informativa."""
                             f"tokens: {metrics.total_tokens}, RAG hits: {metrics.rag_results_count}")
                 
                 return ExecutionResult(
-                    sucess=True,
+                    success=True,
                     response=response,
                     tool_calls=tool_calls,
                     execution_time_ms=metrics.total_execution_time_ms,
@@ -378,7 +378,7 @@ Responda sempre de forma profissional e informativa."""
                 self.set_status(AgentStatus.ERROR)
 
                 return ExecutionResult(
-                    sucess=False,
+                    success=False,
                     response=f"Erro ao processar a solicitação: {str(e)}",
                     execution_time_ms=(time.time() - total_start_time) * 1000,
                     metadata={"error": str(e)}
@@ -388,20 +388,28 @@ Responda sempre de forma profissional e informativa."""
             self.set_status(AgentStatus.ERROR)
 
             return ExecutionResult(
-                sucess=False,
+                success=False,
                 response=f"Erro critico: {str(e)}",
                 execution_time_ms=(time.time() - total_start_time) * 1000,
                 metadata={"error": str(e)}
             )
         
-    async def _execute_llm(self, input_text: str) -> str:
-        """Executa LLM com tratamento de erro."""
+    async def _execute_llm(self, input_text: str, rag_context: str = "") -> str:
+        """Executa LLM com LangChain e histórico de conversação"""
         try:
+            # Construir pormpt com RAG context
+            if rag_context:
+                full_input = f"{input_text}\n\nContexto do RAG:\n{rag_context}"
+            else:
+                full_input = input_text
+            
+            logger.debug(f"Executando LLM com input: {full_input[:100]}...")
+
             # Placeholder para real invocation
-            response = await self.agent_executor.invoke({
-                "input": input_text,
-                "chat_history": self.memory.load_memory_variables({})["chat_history"]
-                })
+            response = await asyncio.to_thread(
+                self.llm.invoke,
+                [{"role": "user", "content": full_input}]
+                )
 
             # Para demonstração, retornar resposta generica
             # response = (
@@ -412,8 +420,13 @@ Responda sempre de forma profissional e informativa."""
             # )
 
             # return response
-            return response.get("output", "")
-        
+            if hasattr(response, "content"):
+                return response.content
+            elif isinstance(response, str):
+                return response
+            else:
+                return str(response)
+
         except Exception as e:
             logger.error(f"Erro ao executar LLM: {str(e)}")
             raise
@@ -429,11 +442,11 @@ Responda sempre de forma profissional e informativa."""
         self.set_status(AgentStatus.TOOL_CALLING)
 
         try:
-            sucess, output = await tool_registry.execute_tool(tool_name, tool_input)
+            success, output = await tool_registry.execute_tool(tool_name, tool_input)
 
             self.set_status(AgentStatus.IDLE)
 
-            return sucess, output
+            return success, output
 
         except Exception as e:
             logger.error(f"Erro ao processa tool call '{tool_name}': {str(e)}")
