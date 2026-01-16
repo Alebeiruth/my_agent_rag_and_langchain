@@ -436,5 +436,3 @@ def paginate(items: List[Any], page: int = 1, page_size: int = 20) -> Tuple[List
     }
 
     return paginated_items, metadata
-
-
