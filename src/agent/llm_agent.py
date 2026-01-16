@@ -5,12 +5,17 @@ from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime
 from dataclasses import dataclass, asdict
 import asyncio
+import sys
 
+from langchain_openai import ChatOpenAI
 from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
-from langchain.callbacks.base import BaseCallbackHandler
+
+
+from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.callbacks import BaseCallbackHandler
 
 from src.config.settings import get_settings
 from src.agent.base_agent import BaseAgent, AgentConfig, AgentStatus, ExecutionResult, Message
@@ -92,7 +97,7 @@ class LLMAgent(BaseAgent):
 
     def __init__(
         self,
-        name: str = "SABIA_Agent",
+        name: str = "Agent_IA",
         config: Optional[AgentConfig] = None,
         enable_metrics: bool = True
     ):
@@ -107,22 +112,33 @@ class LLMAgent(BaseAgent):
         super().__init__(name, config)
 
         self.enable_metrics = enable_metrics
-        self.llm = ChatOpenAI(
-            model_name=config.model,
-            temperature=config.temperature,
-            max_tokens=config.max_tokens,
-            openai_api_key=settings.OPENAI_API_KEY,
-            callbacks=[MetricsCollector()] if enable_metrics else None
-        )
 
+        # Inicializar LLM OpenAI com LangChain
+        try:
+            self.llm = ChatOpenAI(
+                model_name=config.model,
+                temperature=config.temperature,
+                max_tokens=config.max_tokens,
+                openai_api_key=settings.OPENAI_API_KEY,
+                verbose=settings.DEBUG
+                # callbacks=[MetricsCollector()] if enable_metrics else None
+            )
+            logger.info(f"LLM OpenAI inicializado: {config.model}")
+        except Exception as e:
+            logger.error(f"Erro ao inicializar LLM: {str(e)}")
+            raise
+        
+        # Inicializar memória
         self.memory = ConversationBufferMemory(
             memory_key="chat_history",
             return_messages=True,
             max_token_limit=8000
         )
 
-        self.agent_executor = None
-        self._build_agent()
+        # self.agent_executor = None
+        # self._build_agent()
+        
+        tool_registry.initialize_default_tools()
 
         logger.info(f"LLMAgent '{self.name}' inicializando com métricas: {enable_metrics}")
 
@@ -130,24 +146,35 @@ class LLMAgent(BaseAgent):
     def _build_system_prompt() -> str:
         """Constroi prompt do sistema com contexto de setores"""
         return f"""
-Você é um especialista em indústrias paranaenses. Tem conhecimento profundo sobre:
+
+SETORES DE ESPECIALIZAÇÃO:
 - Alimentos, Bebidas, Construção Civil, Madeira e Móveis
 - Mineração, Plástico e Borracha, Tecnologia da Informação
 - Automotivo, Celulose e Papel, Gráfico, Metalmecânica
 - Petróleo e Biocombustíveis, Químico e Farmacêutico, Têxtil/Vestuário/Couro
 
-Você possui acesso a ferramentas para:
-1. Buscar documentos similares em vector store (RAG)
-2. Consultar banco de dados de histórico
-3. Realizar cálculos matemáticos
+INSTRUÇÕES:
+1. Responda de forma clara, precisa e bem estruturada
+2. Use informações do contexto RAG quando disponível
+3. Cite fontes e dados específicos quando usar RAG
+4. Para dados atualizados, utilize as ferramentas disponíveis
+5. Mantenha respostas em português brasileiro
+6. Seja específico sobre o setor industrial quando mencionado
+7. Se não tiver informação suficiente, reconheça a limitação
 
-Sempre:
+SEMPRE:
 - Use as ferramentas disponíveis para trazer informações precisas
 - Cite a fonte de informações quando possível
 - Mantenha respostas em português brasileiro
 - Seja específico sobre o setor industrial mencionado
 - Reconheça limitações quando não tiver informação suficiente
-"""
+
+FERRAMENTAS DISPONÍVEIS:
+- vector_search: Busca documentos similares no Pinecone
+- database_query: Consulta dados históricos
+- calculator: Realiza cálculos matemáticos
+
+Responda sempre de forma profissional e informativa."""
     def _build_agent(self) -> None:
         """Constroi o agente com LangChain."""
         try:
@@ -371,17 +398,21 @@ Sempre:
         """Executa LLM com tratamento de erro."""
         try:
             # Placeholder para real invocation
-            # Em produção: response = awiat self.agent_executor.invoke({"input": input_text})
+            response = await self.agent_executor.invoke({
+                "input": input_text,
+                "chat_history": self.memory.load_memory_variables({})["chat_history"]
+                })
 
             # Para demonstração, retornar resposta generica
-            response = (
-                f"Baseado no contexto recuperado, analisei sua pergunta: '{input_text[:50]}...'\n"
-                f"Utilizei ferramentas de busca semântica no vector store (Pinecone) para encontrar "
-                f"documentos relacionados aos setores industriais paranaenses.\n"
-                f"A resposta foi processada com temperatura 0.7 e até 2048 tokens."
-            )
+            # response = (
+            #     f"Baseado no contexto recuperado, analisei sua pergunta: '{input_text[:50]}...'\n"
+            #     f"Utilizei ferramentas de busca semântica no vector store (Pinecone) para encontrar "
+            #     f"documentos relacionados aos setores industriais paranaenses.\n"
+            #     f"A resposta foi processada com temperatura 0.7 e até 2048 tokens."
+            # )
 
-            return response
+            # return response
+            return response.get("output", "")
         
         except Exception as e:
             logger.error(f"Erro ao executar LLM: {str(e)}")

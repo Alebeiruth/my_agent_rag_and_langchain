@@ -1,0 +1,334 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-01-16T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_sabia_agente_ia",
+      "_type": "workspace",
+      "name": "SABIA - Agente de IA",
+      "description": "Testes de API para Sistema de Agente de IA em Indústrias Paranaenses",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_sabia_agente_ia",
+      "name": "Base",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "api_url": "http://localhost:3000/api/v1/agent",
+        "access_token": "",
+        "refresh_token": "",
+        "conversation_id": "",
+        "user_id": 1
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "api_url",
+          "access_token",
+          "refresh_token",
+          "conversation_id",
+          "user_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1000000000000000
+    },
+    {
+      "_id": "fld_health",
+      "_type": "request_group",
+      "parentId": "wrk_sabia_agente_ia",
+      "name": "Health & Status",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 100000000000000
+    },
+    {
+      "_id": "req_health_check",
+      "_type": "request",
+      "parentId": "fld_health",
+      "name": "Health Check",
+      "url": "{{ base_url }}/health",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1000000000000001,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "req_health_db",
+      "_type": "request",
+      "parentId": "fld_health",
+      "name": "Health Check DB",
+      "url": "{{ base_url }}/health/db",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1000000000000002,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "req_health_system",
+      "_type": "request",
+      "parentId": "fld_health",
+      "name": "Health Check System",
+      "url": "{{ base_url }}/health/system",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1000000000000003,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "fld_conversations",
+      "_type": "request_group",
+      "parentId": "wrk_sabia_agente_ia",
+      "name": "Conversações",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 100000000000001
+    },
+    {
+      "_id": "req_create_conversation",
+      "_type": "request",
+      "parentId": "fld_conversations",
+      "name": "Criar Conversação",
+      "url": "{{ api_url }}/conversations",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Análise de Alimentos\",\n  \"system_prompt\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ access_token }}",
+          "description": "JWT Token"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000000000000001,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "req_list_conversations",
+      "_type": "request",
+      "parentId": "fld_conversations",
+      "name": "Listar Conversações",
+      "url": "{{ api_url }}/conversations",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "limit",
+          "value": "20",
+          "description": "Número máximo de conversações",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ access_token }}",
+          "description": "JWT Token"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000000000000002,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "req_get_conversation",
+      "_type": "request",
+      "parentId": "fld_conversations",
+      "name": "Obter Detalhes Conversação",
+      "url": "{{ api_url }}/conversations/{{ conversation_id }}",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ access_token }}",
+          "description": "JWT Token"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000000000000003,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "fld_agent",
+      "_type": "request_group",
+      "parentId": "wrk_sabia_agente_ia",
+      "name": "Agente",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 100000000000002
+    },
+    {
+      "_id": "req_execute_agent",
+      "_type": "request",
+      "parentId": "fld_agent",
+      "name": "Executar Agente",
+      "url": "{{ api_url }}/agent/execute",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"conversation_id\": {{ conversation_id }},\n  \"message\": \"Qual é a situação atual do setor de alimentos no Paraná?\",\n  \"use_tools\": true,\n  \"temperature\": 0.7,\n  \"max_tokens\": 2048\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ access_token }}",
+          "description": "JWT Token"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000000000000001,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "req_agent_status",
+      "_type": "request",
+      "parentId": "fld_agent",
+      "name": "Status do Agente",
+      "url": "{{ api_url }}/agent/status",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ access_token }}",
+          "description": "JWT Token"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000000000000002,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "fld_metrics",
+      "_type": "request_group",
+      "parentId": "wrk_sabia_agente_ia",
+      "name": "Métricas",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 100000000000003
+    },
+    {
+      "_id": "req_metrics_conversation",
+      "_type": "request",
+      "parentId": "fld_metrics",
+      "name": "Métricas da Conversação",
+      "url": "{{ api_url }}/metrics/conversation/{{ conversation_id }}",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "limit",
+          "value": "100",
+          "description": "Número máximo de métricas",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ access_token }}",
+          "description": "JWT Token"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000000000000001,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "req_metrics_user",
+      "_type": "request",
+      "parentId": "fld_metrics",
+      "name": "Uso de Tokens do Usuário",
+      "url": "{{ api_url }}/metrics/user",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "days",
+          "value": "30",
+          "description": "Últimos X dias",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ access_token }}",
+          "description": "JWT Token"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000000000000002,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    },
+    {
+      "_id": "fld_root",
+      "_type": "request_group",
+      "parentId": "wrk_sabia_agente_ia",
+      "name": "Root",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 100000000000004
+    },
+    {
+      "_id": "req_root",
+      "_type": "request",
+      "parentId": "fld_root",
+      "name": "Root - Informações da API",
+      "url": "{{ base_url }}/",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1000000000000001,
+      "isPrivate": false,
+      "settingStorageFormat": "json"
+    }
+  ]
+}
