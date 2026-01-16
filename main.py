@@ -41,7 +41,7 @@ def setup_routes(application: FastAPI) -> None:
 
         # Aqui você pode adcionar mais rotas
         # from src.api.routes import auth_routes
-        # app.include_router(auth_routes.router. prefix="/api/v1/auth", tags=["Auth"])
+        # app.include_router(auth_routes.router, prefix="/api/v1/auth", tags=["Auth"])
 
         logger.info("Todas as rotas froam configuradas com sucesso")
     

@@ -220,8 +220,8 @@ async def root():
 
 # ===== IMPORTAR ROTAS =====
 # Rotas serão importadas aqui depois de criadas
-# from src.api.routes import agent_routes
-# app.include_router(agent_routes.router, prefix="/api/v1/agent", tags=["Agent"])
+from src.api.routes import agent_routes
+app.include_router(agent_routes.router, prefix="/api/v1/agent", tags=["Agent"])
 
 if __name__ == "__manin__":
     import uvicorn

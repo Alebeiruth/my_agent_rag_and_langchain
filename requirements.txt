@@ -1,0 +1,52 @@
+# ===== FRAMEWORK WEB =====
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# ===== VALIDAÇÃO DE DADOS =====
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# ===== BANCO DE DADOS =====
+sqlalchemy==2.0.23
+pymysql==1.1.0
+alembic==1.12.1
+
+# ===== LLM E IA =====
+openai==1.3.0
+langchain==0.1.0
+pinecone-client==2.2.4
+
+# ===== AUTENTICAÇÃO E SEGURANÇA =====
+PyJWT==2.8.1
+passlib==1.7.4
+python-multipart==0.0.6
+bcrypt==4.1.1
+cryptography==41.0.7
+
+# ===== HTTP E REQUISIÇÕES =====
+httpx==0.25.0
+requests==2.31.0
+aiohttp==3.9.1
+
+# ===== UTILITÁRIOS =====
+python-dotenv==1.0.0
+python-dateutil==2.8.2
+
+# ===== LOGGING E MONITORAMENTO =====
+python-json-logger==2.0.7
+
+# ===== DESENVOLVIMENTO =====
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+black==23.12.0
+flake8==6.1.0
+isort==5.13.2
+mypy==1.7.1
+
+# ===== TESTES DE CARGA =====
+locust==2.17.0
+
+# ===== DOCUMENTAÇÃO =====
+mkdocs==1.5.3
+mkdocs-material==9.4.14

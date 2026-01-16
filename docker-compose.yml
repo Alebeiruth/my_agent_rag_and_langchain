@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # ===== API AGENTE DE IA =====
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sabia-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DEBUG=True
+      - API_HOST=0.0.0.0
+      - API_PORT=3000
+      - API_WORKERS=1
+      - API_RELOAD=True
+      
+      # OpenAI
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4-turbo
+      - OPENAI_TEMPERATURE=0.7
+      - OPENAI_MAX_TOKENS=2048
+      
+      # MySQL
+      - MYSQL_DB_HOST=mysql
+      - MYSQL_DB_PORT=3306
+      - MYSQL_DB_USER=${MYSQL_DB_USER}
+      - MYSQL_DB_PASSWORD=${MYSQL_DB_PASSWORD}
+      - MYSQL_DB_SCHEMA=${MYSQL_DB_SCHEMA}
+      - DB_SSL=false
+      
+      # JWT
+      - JWT_SECRET_TOKEN=${JWT_SECRET_TOKEN}
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION_HOURS=24
+      - JWT_REFRESH_EXPIRATION_DAYS=7
+      
+      # Pinecone
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_ENVIRONMENT=gcp-starter
+      - PINECONE_INDEX_NAME=agent-embeddings
+      
+      # Logging
+      - LOG_LEVEL=INFO
+    
+    depends_on:
+      mysql:
+        condition: service_healthy
+    
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - ./main.py:/app/main.py
+    
+    networks:
+      - sabia-network
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    restart: unless-stopped
+
+
+  # ===== BANCO DE DADOS MYSQL =====
+  mysql:
+    image: mysql:8.0-debian
+    container_name: sabia-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password}
+      - MYSQL_USER=${MYSQL_DB_USER}
+      - MYSQL_PASSWORD=${MYSQL_DB_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DB_SCHEMA}
+    
+    ports:
+      - "3306:3306"
+    
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    
+    networks:
+      - sabia-network
+    
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_DB_USER}", "-p${MYSQL_DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    
+    restart: unless-stopped
+    
+    command: --default-authentication-plugin=mysql_native_password
+              --character-set-server=utf8mb4
+              --collation-server=utf8mb4_unicode_ci
+              --max_connections=1000
+
+
+  # ===== PHPMYADMIN (OPCIONAL) =====
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: sabia-phpmyadmin
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=${MYSQL_DB_USER}
+      - PMA_PASSWORD=${MYSQL_DB_PASSWORD}
+      - PMA_DB_ENGINE=mysql
+    
+    ports:
+      - "8080:80"
+    
+    depends_on:
+      - mysql
+    
+    networks:
+      - sabia-network
+    
+    restart: unless-stopped
+
+
+volumes:
+  mysql-data:
+    driver: local
+
+
+networks:
+  sabia-network:
+    driver: bridge
