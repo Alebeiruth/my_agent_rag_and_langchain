@@ -5,17 +5,9 @@ from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime
 from dataclasses import dataclass, asdict
 import asyncio
-import sys
 
 from langchain_openai import ChatOpenAI
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
-
-
-from langchain.agents import AgentExecutor, create_openai_functions_agent
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_core.callbacks import BaseCallbackHandler
 
 from src.config.settings import get_settings
 from src.agent.base_agent import BaseAgent, AgentConfig, AgentStatus, ExecutionResult, Message
@@ -75,22 +67,22 @@ class AgentMetrics:
         data['timestamp'] = self.timestamp.isoformat()
         return data
     
-class MetricsCollector:
-    """Collecto customizado para capturar métricas do LANGCHAIN."""
+# class MetricsCollector:
+#     """Collecto customizado para capturar métricas do LANGCHAIN."""
 
-    def __init__(self):
-        self.start_time = None
-        self.llm_start_time = None
-        self.token_count = {"input": 0, "output": 0}
+#     def __init__(self):
+#         self.start_time = None
+#         self.llm_start_time = None
+#         self.token_count = {"input": 0, "output": 0}
     
 
-    def on_llm_start(self, *args, **kwargs):
-        self.llm_start_time = time.time()
+#     def on_llm_start(self, *args, **kwargs):
+#         self.llm_start_time = time.time()
 
-    def on_llm_end(self, *args, **kwargs):
-        if self.llm_start_time:
-            self.token_count["output"] = kwargs.get("usage", {}).get("completion_tokens", 0)
-            self.token_count["input"] = kwargs.get("usage", {}).get("prompt_tokens", 0)
+#     def on_llm_end(self, *args, **kwargs):
+#         if self.llm_start_time:
+#             self.token_count["output"] = kwargs.get("usage", {}).get("completion_tokens", 0)
+#             self.token_count["input"] = kwargs.get("usage", {}).get("prompt_tokens", 0)
 
 class LLMAgent(BaseAgent):
     """Agente de IA com integração OpenAI, LangChain e coleta de métricas"""
@@ -136,7 +128,7 @@ class LLMAgent(BaseAgent):
         )
 
         # self.agent_executor = None
-        self._build_agent()
+        # self._build_agent()
         
         tool_registry.initialize_default_tools()
 
@@ -145,7 +137,7 @@ class LLMAgent(BaseAgent):
     @staticmethod
     def _build_system_prompt() -> str:
         """Constroi prompt do sistema com contexto de setores"""
-        return f"""
+        return f"""Você é um assistente inteligente especializado em indústrias paranaenses
 
 SETORES DE ESPECIALIZAÇÃO:
 - Alimentos, Bebidas, Construção Civil, Madeira e Móveis
@@ -175,51 +167,51 @@ FERRAMENTAS DISPONÍVEIS:
 - calculator: Realiza cálculos matemáticos
 
 Responda sempre de forma profissional e informativa."""
-    def _build_agent(self) -> None:
-        """Constroi o agente com LangChain."""
-        try:
-            # Registra ferramentas padrão
-            tool_registry.initialize_default_tools()
+    # def _build_agent(self) -> None:
+    #     """Constroi o agente com LangChain."""
+    #     try:
+    #         # Registra ferramentas padrão
+    #         tool_registry.initialize_default_tools()
 
-            # Obter tools do registry e converter para LangChain format
-            tools_schema = tool_registry.get_tools_schema()
+    #         # Obter tools do registry e converter para LangChain format
+    #         tools_schema = tool_registry.get_tools_schema()
 
-            # Tempalte de prompt
-            prompt = ChatPromptTemplate.from_messages([
-                ("system", self.config.system_prompt),
-                MessagesPlaceholder(variable_name="chat_history"),
-                ("human", "{input}"),
-                MessagesPlaceholder(variable_name="agent_scratchpad")
-            ])
+    #         # Tempalte de prompt
+    #         prompt = ChatPromptTemplate.from_messages([
+    #             ("system", self.config.system_prompt),
+    #             MessagesPlaceholder(variable_name="chat_history"),
+    #             ("human", "{input}"),
+    #             MessagesPlaceholder(variable_name="agent_scratchpad")
+    #         ])
 
-            # Criar agent com OpenAI Functions
-            agent = create_openai_functions_agent(
-                llm=self.llm,
-                tools=[], # Tools adicionadas dinamicamente
-                prompt=prompt,
-            )
+    #         # Criar agent com OpenAI Functions
+    #         agent = create_openai_functions_agent(
+    #             llm=self.llm,
+    #             tools=[], # Tools adicionadas dinamicamente
+    #             prompt=prompt,
+    #         )
 
-            self.agent_executor = AgentExecutor.from_agent_and_tools(
-                agent=agent,
-                tools=[],
-                memory=self.memory,
-                verbose=True,
-                handle_parsing_errors=True,
-                max_iterations=5
-            )
+    #         self.agent_executor = AgentExecutor.from_agent_and_tools(
+    #             agent=agent,
+    #             tools=[],
+    #             memory=self.memory,
+    #             verbose=True,
+    #             handle_parsing_errors=True,
+    #             max_iterations=5
+    #         )
 
-            logger.info("Agente LangChain criado com sucesso.")
+    #         logger.info("Agente LangChain criado com sucesso.")
         
-        except Exception as e:
-            logger.error(f"Erro ao criar agente:: {str(e)}")
-            raise
+    #     except Exception as e:
+    #         logger.error(f"Erro ao criar agente:: {str(e)}")
+    #         raise
     
     async def _perform_rag_search(
         self,
         query: str,
         top_k: int = 5,
         threshold: float = 0.7
-    ) -> Tuple[List[Dict[str, Any]], float, int]:
+    ) -> Tuple[List[Dict[str, Any]], float, int, float, float, bool]:
         """Executa busca RAG no Pinecone"""
         rag_start_time = time.time()
 
@@ -246,14 +238,14 @@ Responda sempre de forma profissional e informativa."""
 
                 logger.info(f"RAG search completado: {len(results)} resultados, score médio: {avg_score:.3f}")
 
-                return results, rag_time, avg_score, top_score, hit_rate
+                return results, rag_time, len(results), avg_score, top_score, hit_rate
             else:
                 logger.warning(f"RAG search falhou: {output}")
-                return [], rag_time, 0.0, 0.0, False
+                return [], rag_time, 0, 0.0, 0.0, False
         
         except Exception as e:
             logger.error(f"Erro em RAG search: {str(e)}")
-            return [], (time.time() - rag_start_time) * 1000, 0.0, 0.0, False
+            return [], (time.time() - rag_start_time) * 1000, 0, 0.0, 0.0, False
         
     async def execute(
             self,
@@ -321,7 +313,7 @@ Responda sempre de forma profissional e informativa."""
                 tool_calls = []
                 tool_calls_names = []
 
-                # Simulação de tokens (em produção, obter do LLM)
+                # Estimativa de tokens (em produção, obter do LLM)
                 input_tokens = len(enriched_input.split()) * 1.3
                 output_tokens = len(response.split()) * 1.3
                 total_tokens = input_tokens + output_tokens
@@ -394,37 +386,26 @@ Responda sempre de forma profissional e informativa."""
                 metadata={"error": str(e)}
             )
         
-    async def _execute_llm(self, input_text: str, rag_context: str = "") -> str:
+    async def _execute_llm(self, input_text: str) -> str:
         """Executa LLM com LangChain e histórico de conversação"""
         try:
-            # Construir pormpt com RAG context
-            if rag_context:
-                full_input = f"{input_text}\n\nContexto do RAG:\n{rag_context}"
-            else:
-                full_input = input_text
-            
-            logger.debug(f"Executando LLM com input: {full_input[:100]}...")
+          
+            logger.debug(f"Executando LLM com input: {input_text[:100]}...")
 
             # Placeholder para real invocation
             response = await asyncio.to_thread(
                 self.llm.invoke,
-                [{"role": "user", "content": full_input}]
+                [{"role": "user", "content": input_text}]
                 )
-
-            # Para demonstração, retornar resposta generica
-            # response = (
-            #     f"Baseado no contexto recuperado, analisei sua pergunta: '{input_text[:50]}...'\n"
-            #     f"Utilizei ferramentas de busca semântica no vector store (Pinecone) para encontrar "
-            #     f"documentos relacionados aos setores industriais paranaenses.\n"
-            #     f"A resposta foi processada com temperatura 0.7 e até 2048 tokens."
-            # )
 
             # return response
             if hasattr(response, "content"):
                 return response.content
+            elif isinstance(response, dict) and "output" in response:
+                return response.get("output", "")
             elif isinstance(response, str):
-                return response
-            else:
+                return str(response)
+            else: 
                 return str(response)
 
         except Exception as e:
