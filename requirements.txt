@@ -8,7 +8,7 @@ pydantic-settings==2.1.0
 
 # ===== BANCO DE DADOS =====
 sqlalchemy==2.0.23
-pymysql==1.1.0
+pymysql==1.1.1
 alembic==1.12.1
 
 # ===== LLM E IA =====
@@ -21,12 +21,12 @@ PyJWT==2.8.1
 passlib==1.7.4
 python-multipart==0.0.6
 bcrypt==4.1.1
-cryptography==41.0.7
+cryptography==42.0.4
 
 # ===== HTTP E REQUISIÇÕES =====
 httpx==0.25.0
 requests==2.31.0
-aiohttp==3.9.1
+aiohttp==3.13.3
 
 # ===== UTILITÁRIOS =====
 python-dotenv==1.0.0

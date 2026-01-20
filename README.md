@@ -1,15 +1,15 @@
-# SABIA - Agente de IA para Indústrias Paranaenses
+# Agente de IA para Indústrias
 
 ![Status](https://img.shields.io/badge/status-development-yellow)
 ![Python](https://img.shields.io/badge/python-3.10+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green)
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 
-Sistema inteligente especializado em consulta e análise de indústrias paranaenses utilizando Agentes de IA, RAG (Retrieval Augmented Generation) e LangChain.
+Sistema inteligente especializado em consulta e análise de indústrias utilizando Agentes de IA, RAG (Retrieval Augmented Generation) e LangChain.
 
 ## 📋 Visão Geral
 
-**SABIA** é um backend robusto que fornece:
+**Agente de IA** é um backend robusto que fornece:
 
 - 🤖 **Agente de IA** com OpenAI GPT-4 Turbo
 - 🔍 **RAG (Retrieval Augmented Generation)** com Pinecone
@@ -134,23 +134,23 @@ DEBUG=True
 PORT=3000
 
 # OpenAI
-OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxx
+OPENAI_API_KEY=sl-dev-xxxxxxxxxxxxx
 OPENAI_MODEL=gpt-4-turbo
 OPENAI_TEMPERATURE=0.7
 OPENAI_MAX_TOKENS=2048
 
 # MySQL (Azure)
-MYSQL_DB_HOST=bd-chatbot-mkt.mysql.database.azure.com
-MYSQL_DB_USER=bdChatbotMkt
+MYSQL_DB_HOST=ale-agent.mysql.database.azure.com
+MYSQL_DB_USER=bdChatbot
 MYSQL_DB_PASSWORD=fGMuK8N698
-MYSQL_DB_SCHEMA=sabia_relacionamento_db
+MYSQL_DB_SCHEMA=agente_db
 
 # Pinecone
 PINECONE_API_KEY=xxxxxxxxxxxxx
 PINECONE_INDEX_NAME=agent-embeddings
 
 # JWT
-JWT_SECRET_TOKEN=y3DsjrrQ7upJgB/MNh6mIMK9mOo7Xw6urkkYGbCAIzI=
+JWT_SECRET_TOKEN=
 ```
 
 ## 🔌 Endpoints da API
