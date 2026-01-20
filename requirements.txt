@@ -21,7 +21,7 @@ PyJWT==2.8.1
 passlib==1.7.4
 python-multipart==0.0.6
 bcrypt==4.1.1
-cryptography==42.0.4
+cryptography==44.0.1
 
 # ===== HTTP E REQUISIÇÕES =====
 httpx==0.25.0
