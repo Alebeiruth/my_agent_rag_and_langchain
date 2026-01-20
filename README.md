@@ -143,7 +143,7 @@ OPENAI_MAX_TOKENS=2048
 MYSQL_DB_HOST=ale-agent.mysql.database.azure.com
 MYSQL_DB_USER=bdChatbot
 MYSQL_DB_PASSWORD=fGMuK8N698
-MYSQL_DB_SCHEMA=agente_relacionamento_db
+MYSQL_DB_SCHEMA=agente_db
 
 # Pinecone
 PINECONE_API_KEY=xxxxxxxxxxxxx
