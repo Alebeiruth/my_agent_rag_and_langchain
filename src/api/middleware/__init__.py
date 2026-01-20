@@ -4,7 +4,7 @@ from src.api.middleware.auth import (
     verify_token,
     verify_refresh_token,
     verify_admin,
-    verify_Active_user,
+    verify_active_user,
     auth_manager,
     hash_password,
     verify_password,

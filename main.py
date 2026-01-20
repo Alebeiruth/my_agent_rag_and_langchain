@@ -15,7 +15,6 @@ from src.config.settings import get_settings
 from src.config.logging_config import setup_logging, get_logger
 from src.models.database import init_db
 from src.api.main import app
-from src.api.routes.agent_routes import router as agent_router
 
 logger = get_logger("main")
 settings = get_settings()
@@ -43,16 +42,12 @@ def setup_routes(application: FastAPI) -> None:
 
         # Incluir rotas do agente
         application.include_router(
-            agent_router,
+            agent_routes.router,
             prefix="/api/v1/agent",
             tags=["Agent"]
         )
 
         logger.info("Rotas do agente configuradas")
-
-        # Aqui você pode adcionar mais rotas
-        # from src.api.routes import auth_routes
-        # app.include_router(auth_routes.router, prefix="/api/v1/auth", tags=["Auth"])
 
         logger.info("Todas as rotas foram configuradas com sucesso")
     
