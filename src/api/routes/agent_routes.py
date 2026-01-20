@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from src.config.settings import get_settings
 from src.models.schemas import (
-    AgenteExecuteRequest, AgenteExecuteResponse, ConversationCreate,
+    AgenteExecuteRequest, AgenteExecuteResponse, ConversationCreate, AgentExecutionResponse,
     ConversationResponse, ConversationDetailResponse, MessageResponse,
     HealthCheckResponse, SystemStatusResponse, ErrorResponse
 )
@@ -63,7 +63,7 @@ async def create_conversation(
     
     except Exception as e:
         logger.error(f"Erro ao criar conversação: {str(e)}")
-        db.roollback()
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao criar conversação: {str(e)}"
@@ -171,6 +171,31 @@ async def execute_agent(
                 detail="Conversação não encontrada"
             )
         
+        # === Obter contexto do usuario ===
+        user = db_manager.get_user_by_id(db, current_user["user_id"])
+
+        # Obter ultimas 5 conversas para contexto
+        recent_conversations = db_manager.get_user_conversations(db, current_user["user_id"], limit=5)
+
+        # Construir resuma das conversas anteriores
+        conversation_history = ""
+        if recent_conversations and len(recent_conversations) > 1: # Excluir a atual
+            conversation_history = "\n\nConversa anteriores do usuário:\n"
+            for i, conv in enumerate(recent_conversations[:4], 1):
+                if conv.id != conversation.id:
+                    messages_count = len(conv.messages)
+                    conv_date = conv.created_at.strftime("%d/%m/%Y")
+                    conversation_history += f"{i}. {conv.title or "Sem título"} ({conv_date}) - {messages_count} mensagens\n"
+        
+        # Obter ultimas mensagens da conversação atual para contexto
+        messages = db_manager.get_conversation_messages(db, conversation.id, limit=5)
+        recent_context = ""
+        if messages:
+            recent_context = "\n\nContexto recente da conversação:\n"
+            for msg in reversed(messages[-3:]): # Ultima 3 mensagens
+                role_str = "Usuario" if msg.role == "user" else "Assistente"
+                recent_context += f"{role_str}: {msg.content[:200]}...\n"
+        
         # Adicionar mensagem do usuário ao BD
         user_message = Message(
             conversation_id=request.conversation_id,
@@ -187,9 +212,20 @@ async def execute_agent(
             content=request.message
         )
 
+        # ===  Criar prompt com contexto do usuario ===
+        user_context_prompt = f"""
+        CONTEXTO DO USUÁRIO:
+        - Nome: {user.full_name}
+        - Email: {user.email}
+        - Usuário desde: {user.created_at.strftime("%d/%m/%Y")}
+        - Setor de interesse: {conversation.sector or 'Não especificado'}
+        {conversation_history}
+        {recent_context}
+        """
+
         # Executar agente
         execution_result = await agent.execute(
-            user_input=request.message,
+            user_input=user_context_prompt + "\n\nNova pergunta do usuário:\n" + request.message,
             use_tools=request.use_tools,
             conversation_id=request.conversation_id,
             sector=conversation.sector,

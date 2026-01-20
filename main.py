@@ -30,6 +30,17 @@ def setup_routes(application: FastAPI) -> None:
     try:
         logger.info("Configurando rotas da API...")
 
+        # Importar rotas
+        from src.api.routes import agent_routes, auth_routes
+
+        # Incluir rotas de autenticação
+        application.include_router(
+            auth_routes.router,
+            prefix="/api/v1/auth",
+            tags=["Auth"]
+        )
+        logger.info("Rotas de autenticação configuradas")
+
         # Incluir rotas do agente
         application.include_router(
             agent_router,
@@ -43,7 +54,7 @@ def setup_routes(application: FastAPI) -> None:
         # from src.api.routes import auth_routes
         # app.include_router(auth_routes.router, prefix="/api/v1/auth", tags=["Auth"])
 
-        logger.info("Todas as rotas froam configuradas com sucesso")
+        logger.info("Todas as rotas foram configuradas com sucesso")
     
     except Exception as e:
         logger.error(f"Erro ao configurar rotas: {str(e)}")
@@ -52,6 +63,7 @@ def setup_routes(application: FastAPI) -> None:
 def initialize_application() -> FastAPI:
     """
     Inicializada a aplicação.
+
     Returns:
         Instância FastAPI configurada
     """
@@ -76,6 +88,18 @@ def initialize_application() -> FastAPI:
 
         logger.info("=" * 80)
         logger.info("Aplicação inicializada com sucesso!")
+        logger.info("Endpoints disponíveis:")
+        logger.info("  - POST   /api/v1/agent/conversations")
+        logger.info("  - GET    /api/v1/agent/conversations")
+        logger.info("  - GET    /api/v1/agent/conversations/{id}")
+        logger.info("  - POST   /api/v1/agent/agent/execute")
+        logger.info("  - GET    /api/v1/agent/agent/status")
+        logger.info("  - GET    /api/v1/agent/metrics/conversation/{id}")
+        logger.info("  - GET    /api/v1/agent/metrics/user")
+        logger.info("  - GET    /health")
+        logger.info("  - GET    /health/db")
+        logger.info("  - GET    /health/system")
+        logger.info("  - Swagger: http://%s:%d/docs", settings.API_HOST, settings.PORT)
         logger.info("=" * 80)
 
         return app
