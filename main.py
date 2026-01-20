@@ -69,7 +69,7 @@ def initialize_application() -> FastAPI:
         # Inicializar banco de dados
         logger.info("Inicializando banco de dados...")
         init_db()
-        logger.info("Bnaco de dados inicializado")
+        logger.info("Banco de dados inicializado")
 
         # Configurar rotas
         setup_routes(app)
