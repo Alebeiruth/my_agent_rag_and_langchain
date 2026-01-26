@@ -13,7 +13,7 @@ alembic==1.12.1
 
 # ===== LLM E IA =====
 openai==1.3.0
-langchain==0.1.0
+langchain==0.2.5
 pinecone-client==2.2.4
 
 # ===== AUTENTICAÇÃO E SEGURANÇA =====
