@@ -26,7 +26,7 @@ cryptography==42.0.4
 # ===== HTTP E REQUISIÇÕES =====
 httpx==0.25.0
 requests==2.31.0
-aiohttp==3.13.3
+aiohttp==3.13.4
 
 # ===== UTILITÁRIOS =====
 python-dotenv==1.0.0
